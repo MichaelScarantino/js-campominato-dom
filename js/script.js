@@ -5,7 +5,18 @@
 // con difficoltà 3 => tra 1 e 49
 // Quando l'utente clicca su ogni cella, la cella cliccata si colora di azzurro.
 
+// ---------------------------------------------------------------------------------------------------------
 
+// [x] Il computer deve generare 16 numeri casuali nello stesso range della difficoltà prescelta: le bombe.
+// [x] I numeri nella lista delle bombe non possono essere duplicati.
+// [] In seguito l'utente clicca su una cella: se il numero è presente nella lista dei numeri generati 
+//                - abbiamo calpestato una bomba 
+//                - la cella si colora di rosso e la partita termina, 
+//    altrimenti 
+//                - la cella cliccata si colora di azzurro e 
+//                - l'utente può continuare a cliccare sulle altre celle.
+// [] La partita termina quando il giocatore clicca su una bomba o raggiunge il numero massimo possibile di numeri consentiti.
+// [] Al termine della partita il software deve comunicare il punteggio, cioè il numero di volte che l’utente ha cliccato su una cella che non era una b.
 
 
 // seleziono l'id del bottone, quando eseguo il click sul bottone si visualizza la griglia
@@ -20,6 +31,9 @@ function playGame() {
     const mainGrid = document.getElementById('grid');
     mainGrid.classList.remove('hidden');
     mainGrid.innerHTML = '';
+
+    // imposto una variabile con il numero di bombe presenti nel gioco
+    const maxBombNumber = 16;
 
     // leggere la difficoltà impostata dall'utente
     const userDifficulty = document.getElementById('difficulty-type').value;
@@ -36,6 +50,14 @@ function playGame() {
         numbersOfCells = 49;
         gridDimension = 7;
     }
+    // genero 16 numeri casuali nello stesso range della difficoltà prescelta: le bombe.
+    const bombArray = generateBombArray(numbersOfCells, maxBombNumber)
+    console.log(bombArray);
+    // calcolo il numero massimo di tentativi dopo il quale l'utente ha vinto
+    const maxUserAttemps = numbersOfCells - bombArray.length;
+    // creo un array in cui inserisco i tentativi corretti dell'utente
+    const rightUserAttemps = [];
+
     // creo le celle in base al livello
     for( let i = 1; i <= numbersOfCells; i++ ) {
         const newGeneratedCell = generateCellsItem(i, gridDimension);
@@ -44,17 +66,47 @@ function playGame() {
         mainGrid.appendChild(newGeneratedCell);
     }
     
-    
-  
+    // funzione al clik su una cella
+    function cellsClick() {
+        // leggo il valore della cella cliccata dall'utente
+        const clickNumber = parseInt( this.querySelector('span').textContent );
+
+        // se il numero è presente nella lista dei numeri generati:
+        if (bombArray.includes(clickNumber)) {
+        // - abbiamo calpestato una bomba 
+        // - la cella si colora di rosso e la partita termina
+            this.classList.add('red');
+        } else {
+        // altrimenti 
+        // la cella cliccata si colora di azzurro 
+        this.classList.add('active');
+        // l'utente può continuare a cliccare sulle altre celle ma non su quelle già cliccate.
+        this.style.pointerEvents = "none";
+        // il numero cliccato viene aggiunto nell'array dei tentativi corretti
+        rightUserAttemps.push(clickNumber);
+
+        if(rightUserAttemps.length >= maxUserAttemps) {
+            alert('gioco finito, hai vinto')
+        }
+        }
+        
+    }
 }
 
 // ---------
     // FUNCTIONS
     // ---------
-    function cellsClick() {
-        // al click aggiungo la classe active
-        this.classList.add('active');
+    
+    function generateBombArray(maxNumber, numberOfBombs) {
+        let bombGeneratedArray = [];
+        while( bombGeneratedArray.length < numberOfBombs ) {
+            const bombNumberRandom = getRndInteger(1, maxNumber);
+            if(!bombGeneratedArray.includes(bombNumberRandom)){
+                bombGeneratedArray.push(bombNumberRandom);
+            }
         
+        }
+        return bombGeneratedArray;
     }
     
 
@@ -71,3 +123,8 @@ function playGame() {
         return newCell;
         
     }
+
+    // funzione che genera un numero random
+    function getRndInteger(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) ) + min;
+      }
