@@ -9,14 +9,14 @@
 
 // [x] Il computer deve generare 16 numeri casuali nello stesso range della difficoltà prescelta: le bombe.
 // [x] I numeri nella lista delle bombe non possono essere duplicati.
-// [] In seguito l'utente clicca su una cella: se il numero è presente nella lista dei numeri generati 
+// [x] In seguito l'utente clicca su una cella: se il numero è presente nella lista dei numeri generati 
 //                - abbiamo calpestato una bomba 
 //                - la cella si colora di rosso e la partita termina, 
 //    altrimenti 
 //                - la cella cliccata si colora di azzurro e 
 //                - l'utente può continuare a cliccare sulle altre celle.
-// [] La partita termina quando il giocatore clicca su una bomba o raggiunge il numero massimo possibile di numeri consentiti.
-// [] Al termine della partita il software deve comunicare il punteggio, cioè il numero di volte che l’utente ha cliccato su una cella che non era una b.
+// [x] La partita termina quando il giocatore clicca su una bomba o raggiunge il numero massimo possibile di numeri consentiti.
+// [x] Al termine della partita il software deve comunicare il punteggio, cioè il numero di volte che l’utente ha cliccato su una cella che non era una b.
 
 
 // seleziono l'id del bottone, quando eseguo il click sul bottone si visualizza la griglia
@@ -30,7 +30,9 @@ function playGame() {
 
     const mainGrid = document.getElementById('grid');
     mainGrid.classList.remove('hidden');
+    // pulisto la griglia e inserisco la classe hidden all'h2
     mainGrid.innerHTML = '';
+    document.getElementById('endgamemessage').classList.add('hidden');
 
     // imposto una variabile con il numero di bombe presenti nel gioco
     const maxBombNumber = 16;
@@ -73,23 +75,48 @@ function playGame() {
 
         // se il numero è presente nella lista dei numeri generati:
         if (bombArray.includes(clickNumber)) {
-        // - abbiamo calpestato una bomba 
-        // - la cella si colora di rosso e la partita termina
+            // abbiamo calpestato una bomba 
+            // la cella si colora di rosso e la partita termina
             this.classList.add('red');
+            endGame('lose');
         } else {
-        // altrimenti 
-        // la cella cliccata si colora di azzurro 
-        this.classList.add('active');
-        // l'utente può continuare a cliccare sulle altre celle ma non su quelle già cliccate.
-        this.style.pointerEvents = "none";
-        // il numero cliccato viene aggiunto nell'array dei tentativi corretti
-        rightUserAttemps.push(clickNumber);
-
-        if(rightUserAttemps.length >= maxUserAttemps) {
-            alert('gioco finito, hai vinto')
-        }
+            // altrimenti 
+            // la cella cliccata si colora di azzurro 
+            this.classList.add('active');
+            // l'utente può continuare a cliccare sulle altre celle ma non su quelle già cliccate.
+            this.style.pointerEvents = "none";
+            // il numero cliccato viene aggiunto nell'array dei tentativi corretti
+            rightUserAttemps.push(clickNumber);
+            // se i tentativi sono uguali al numero massimo di tentativi il gioco finisce e l'utente ha vinto
+            if(rightUserAttemps.length >= maxUserAttemps) {
+                endGame('win');
+            }
         }
         
+    }
+
+    // funzione che specifica se l'utente ha vinto o perso
+    // winOrLose = win se l'utente ha vinto e lose se l'utente ha perso
+    function endGame(winOrLose) {
+        let winOrLoseMessage;
+        if(winOrLose === 'win') {
+        // se l'utente ha vinto
+            winOrLoseMessage = 'Congratulazioni! Hai vinto.';
+        } else {
+            // se l'utente ha perso inserisco il numero di tentativi azzeccati 
+            winOrLoseMessage = 'Hai perso, hai azzeccato ' + rightUserAttemps.length + ' tentativi.';
+        }
+        // messaggio finale da stampare per l'utente
+        const endGameMessage = document.getElementById('endgamemessage');
+        endGameMessage.innerHTML = winOrLoseMessage;
+        endGameMessage.classList.remove('hidden');
+
+        // impedisco a tutte le celle di essere cliccabili
+        const allCells = document.getElementsByClassName('single-cell');
+        for( let i = 0; i < allCells.length; i++) {
+            const thisCell = allCells[i];
+            thisCell.style.pointerEvents = "none";
+        }
     }
 }
 
@@ -97,6 +124,13 @@ function playGame() {
     // FUNCTIONS
     // ---------
     
+    
+
+
+    // funzione che genera un array di 16 numneri random = bombe
+    // maxNumber = numero di celle in base al livello
+    // numberOfBombs = numero di bombe da generare
+    // return = array di 16 numeri diversi tra loro
     function generateBombArray(maxNumber, numberOfBombs) {
         let bombGeneratedArray = [];
         while( bombGeneratedArray.length < numberOfBombs ) {
